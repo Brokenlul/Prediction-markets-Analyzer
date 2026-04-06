@@ -53,7 +53,7 @@ export function useKalshiMarkets() {
     queryFn: async (): Promise<Market[]> => {
       try {
         const res = await fetch(
-          'https://api.elections.kalshi.com/trade-api/v2/markets?status=open&limit=100',
+          '/api/kalshi/markets?status=open&limit=100',
           {
             method: 'GET',
             headers: { 'Accept': 'application/json' }

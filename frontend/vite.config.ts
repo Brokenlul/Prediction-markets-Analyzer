@@ -25,6 +25,11 @@ export default defineConfig({
           'Origin': 'https://clob.polymarket.com'
         }
       },
+      '/api/kalshi': {
+        target: 'https://api.elections.kalshi.com/trade-api/v2',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/kalshi/, ''),
+      },
     }
   }
 })

@@ -1,8 +1,18 @@
 {
-  "experimentalServices": {
-    "frontend": {
-      "entrypoint": "frontend",
-      "routePrefix": "/"
+  "buildCommand": "cd frontend && npm install && npm run build",
+  "outputDirectory": "frontend/dist",
+  "rewrites": [
+    {
+      "source": "/api/polymarket/:path*",
+      "destination": "https://gamma-api.polymarket.com/:path*"
+    },
+    {
+      "source": "/api/polymarket-clob/:path*",
+      "destination": "https://clob.polymarket.com/:path*"
+    },
+    {
+      "source": "/api/kalshi/:path*",
+      "destination": "https://api.elections.kalshi.com/trade-api/v2/:path*"
     }
-  }
+  ]
 }
