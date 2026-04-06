@@ -38,7 +38,7 @@ async def health():
 @app.get("/api/polymarket/markets")
 async def get_polymarket_markets(
     active: bool = True,
-    limit: int = 100,
+    limit: int = 500,
     order: str = "volume24hr",
     ascending: bool = False
 ):
@@ -67,7 +67,7 @@ async def get_polymarket_prices_history(
 @app.get("/api/kalshi/markets")
 async def get_kalshi_markets(
     status: str = "open",
-    limit: int = 100
+    limit: int = 200
 ):
     """Proxy for Kalshi API markets endpoint"""
     url = f"{KALSHI_API}/markets?status={status}&limit={limit}"

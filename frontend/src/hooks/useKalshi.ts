@@ -53,7 +53,7 @@ export function useKalshiMarkets() {
     queryFn: async (): Promise<Market[]> => {
       try {
         const res = await fetch(
-          '/api/kalshi/trade-api/v2/markets?status=open&limit=100',
+          '/api/kalshi/markets?limit=200',
           {
             method: 'GET', 
             headers: { 'Accept': 'application/json' }
@@ -72,50 +72,33 @@ export function useKalshiMarkets() {
         const markets = data.markets || data.data || (Array.isArray(data) ? data : []);
         
         return markets
-          .filter((m: any) => m && m.status === 'open')
+          .filter((m: any) => m && (m.status === 'open' || m.status === 'active'))
           .map((m: any) => {
-            // Kalshi prices can be in different formats
             let yesPrice = 50;
-            
-            // Try dollars format first (0.0 - 1.0)
-            if (m.yes_bid_dollars !== undefined && m.yes_ask_dollars !== undefined) {
+            if (m.yes_bid_dollars !== undefined || m.yes_ask_dollars !== undefined) {
               const yesBid = parseFloat(m.yes_bid_dollars) || 0;
               const yesAsk = parseFloat(m.yes_ask_dollars) || 1;
               yesPrice = ((yesBid + yesAsk) / 2) * 100;
+            } else if (m.last_price_dollars !== undefined) {
+              yesPrice = parseFloat(m.last_price_dollars) * 100;
             }
-            // Then try cents format (1-99)
-            else if (m.yes_bid !== undefined || m.yes_ask !== undefined) {
-              const yesBid = m.yes_bid || 0;
-              const yesAsk = m.yes_ask || 100;
-              yesPrice = (yesBid + yesAsk) / 2;
-            }
-            // Fallback to last_price
-            else if (m.last_price !== undefined) {
-              yesPrice = m.last_price;
-            }
-            
-            // Parse volume - might be in cents or dollars
-            let volume24h = 0;
-            if (m.volume_24h_fp) {
-              volume24h = parseFloat(m.volume_24h_fp) || 0;
-            } else if (m.volume_24h) {
-              volume24h = m.volume_24h / 100; // Convert from cents
-            } else if (m.volume) {
-              volume24h = m.volume / 100;
-            }
-            
+
+            const prevPrice = parseFloat(m.previous_price_dollars) * 100 || yesPrice;
+            const change24h = yesPrice - prevPrice;
+
             return {
               id: m.ticker || m.id,
               title: m.title || m.subtitle || 'Unknown Market',
               yesPrice: Math.round(yesPrice * 10) / 10,
-              change24h: 0,
-              volume24h,
+              change24h: Math.round(change24h * 10) / 10,
+              volume24h: m.volume || 0,
               category: detectCategory(m.title || '', m.category || ''),
               source: 'KALSHI' as const,
               ticker: m.ticker,
               endDate: m.close_time || m.expected_expiration_time || ''
             };
-          });
+          })
+          .filter((m: Market) => m.yesPrice > 0.5 && m.yesPrice < 99.5);
       } catch (err) {
         console.error('Kalshi fetch error:', err);
         return [];

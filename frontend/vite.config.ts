@@ -25,14 +25,6 @@ export default defineConfig({
           'Origin': 'https://clob.polymarket.com'
         }
       },
-      '/api/kalshi': {
-        target: 'https://api.elections.kalshi.com',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api\/kalshi/, ''),
-        headers: {
-          'Origin': 'https://api.elections.kalshi.com'
-        }
-      }
     }
   }
 })

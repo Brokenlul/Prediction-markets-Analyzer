@@ -25,13 +25,7 @@ export function Dashboard() {
   const [activeFilter, setActiveFilter] = useState('all');
   const [lastUpdated] = useState(() => new Date());
   
-  // Generate simulated 24h changes for demo
-  const marketsWithChanges = useMemo(() => {
-    return markets.map((market, index) => ({
-      ...market,
-      change24h: market.change24h || (Math.random() - 0.4) * 15 * (index < 20 ? 1.5 : 0.5)
-    }));
-  }, [markets]);
+  const marketsWithChanges = markets;
   
   const filteredMarkets = useMemo(() => {
     if (activeFilter === 'all') return marketsWithChanges;

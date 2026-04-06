@@ -54,13 +54,25 @@ export function usePolymarketMarkets() {
     queryKey: ['polymarket-markets'],
     queryFn: async (): Promise<Market[]> => {
       try {
-        const res = await fetch(
-          '/api/polymarket/markets?active=true&limit=100&order=volume24hr&ascending=false',
-          { 
-            method: 'GET',
-            headers: { 'Accept': 'application/json' }
-          }
-        );
+        let res;
+        try {
+          res = await fetch(
+            '/api/polymarket/markets?active=true&limit=500&order=volume24hr&ascending=false',
+            { 
+              method: 'GET',
+              headers: { 'Accept': 'application/json' }
+            }
+          );
+          if (!res.ok) throw new Error('proxy failed');
+        } catch {
+          res = await fetch(
+            'https://gamma-api.polymarket.com/markets?active=true&limit=500&order=volume24hr&ascending=false',
+            {
+              method: 'GET',
+              headers: { 'Accept': 'application/json' }
+            }
+          );
+        }
         
         if (!res.ok) {
           console.error('Polymarket fetch failed:', res.status, res.statusText);
@@ -98,7 +110,7 @@ export function usePolymarketMarkets() {
               id: m.id || m.conditionId || Math.random().toString(),
               title: m.question || m.title || 'Unknown Market',
               yesPrice: isNaN(yesPrice) ? 50 : Math.round(yesPrice * 10) / 10,
-              change24h: 0,
+              change24h: Math.round((parseFloat(m.oneDayPriceChange) || 0) * 100 * 10) / 10,
               volume24h: parseFloat(m.volume24hr) || parseFloat(m.volumeNum) || 0,
               category: detectCategory(m.question || m.title || '', tagNames),
               source: 'POLY' as const,

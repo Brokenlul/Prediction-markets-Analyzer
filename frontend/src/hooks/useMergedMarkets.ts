@@ -33,7 +33,7 @@ export function useMergedMarkets() {
       
       // Test Kalshi
       try {
-        const r = await fetch('/api/kalshi/trade-api/v2/markets?limit=1');
+        const r = await fetch('/api/kalshi/markets?limit=1');
         console.log('✅ Kalshi:', r.status, r.statusText);
         if (r.ok) {
           const d = await r.json();
