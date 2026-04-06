@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AlertTriangle, ExternalLink } from 'lucide-react';
+import { AlertTriangle, ExternalLink, RefreshCw } from 'lucide-react';
 import { useMergedMarkets } from '../hooks/useMergedMarkets';
 import { STATS } from '../data/stats';
 import { computeSignals } from '../utils/signals';
@@ -15,13 +15,13 @@ import {
   isHighBiasCategory,
   FILTER_CATEGORIES
 } from '../utils/normalize';
-import { SkeletonRow, ErrorState } from '../components/Skeleton';
+import { SkeletonRow } from '../components/Skeleton';
 import { SignalFeed } from '../components/SignalFeed';
 import { Market } from '../types';
 
 export function Dashboard() {
   const navigate = useNavigate();
-  const { markets, isLoading, isError, refetch } = useMergedMarkets();
+  const { markets, isLoading, isError, refetch, polyStatus, kalshiStatus } = useMergedMarkets();
   const [activeFilter, setActiveFilter] = useState('all');
   const [lastUpdated] = useState(() => new Date());
   
@@ -50,6 +50,51 @@ export function Dashboard() {
   const handleMarketClick = (market: Market) => {
     navigate('/chart', { state: { market } });
   };
+
+  // Error state with detailed diagnostics
+  if (isError || (markets.length === 0 && !isLoading)) {
+    return (
+      <div className="max-w-[1920px] mx-auto px-4 py-6">
+        <h1 className="text-2xl font-semibold text-white mb-2" data-testid="dashboard-title">
+          Global Probability Dashboard
+        </h1>
+        
+        <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-5 mb-4">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="w-6 h-6 text-red-400 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="text-red-400 font-medium mb-2">API Connection Issue</p>
+              <p className="text-gray-400 text-sm mb-3">
+                Could not fetch live market data. This is typically a CORS proxy configuration issue.
+              </p>
+              
+              <div className="bg-[#0a0a0f] rounded p-3 mb-4 text-xs font-mono">
+                <p className="text-gray-500 mb-2">Connection Status:</p>
+                <p className={polyStatus.count > 0 ? 'text-green-400' : 'text-red-400'}>
+                  • Polymarket: {polyStatus.isLoading ? 'Loading...' : polyStatus.count > 0 ? `${polyStatus.count} markets` : 'Failed'}
+                </p>
+                <p className={kalshiStatus.count > 0 ? 'text-green-400' : 'text-red-400'}>
+                  • Kalshi: {kalshiStatus.isLoading ? 'Loading...' : kalshiStatus.count > 0 ? `${kalshiStatus.count} markets` : 'Failed'}
+                </p>
+              </div>
+              
+              <button
+                onClick={() => refetch()}
+                className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-sm transition-colors"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Retry Connection
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <p className="text-gray-500 text-xs">
+          Check browser console for detailed API connection diagnostics.
+        </p>
+      </div>
+    );
+  }
   
   return (
     <div className="max-w-[1920px] mx-auto px-4 py-6">
@@ -64,7 +109,7 @@ export function Dashboard() {
       </div>
       
       {/* Signal Feed */}
-      {!isLoading && !isError && signals.length > 0 && (
+      {!isLoading && signals.length > 0 && (
         <SignalFeed 
           signals={signals}
           onSignalClick={handleMarketClick}
@@ -115,15 +160,7 @@ export function Dashboard() {
                 </>
               )}
               
-              {isError && (
-                <tr>
-                  <td colSpan={6}>
-                    <ErrorState message="Could not fetch market data" onRetry={refetch} />
-                  </td>
-                </tr>
-              )}
-              
-              {!isLoading && !isError && filteredMarkets.map(market => {
+              {!isLoading && filteredMarkets.map(market => {
                 const calibration = STATS.calibration[market.category] || STATS.calibration.Default;
                 const showBiasWarning = isHighBiasCategory(market.category);
                 
@@ -189,7 +226,7 @@ export function Dashboard() {
           </table>
         </div>
         
-        {!isLoading && !isError && filteredMarkets.length === 0 && (
+        {!isLoading && filteredMarkets.length === 0 && (
           <div className="py-12 text-center text-gray-500">
             No markets found for this filter
           </div>

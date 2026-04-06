@@ -1,12 +1,53 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import { usePolymarketMarkets } from './usePolymarket';
 import { useKalshiMarkets } from './useKalshi';
 import { Market, ShockAlert } from '../types';
 import { STATS } from '../data/stats';
 
+// Connection test on app load
+let hasTestedConnection = false;
+
 export function useMergedMarkets() {
   const polymarket = usePolymarketMarkets();
   const kalshi = useKalshiMarkets();
+  
+  // Run connection test once
+  useEffect(() => {
+    if (hasTestedConnection) return;
+    hasTestedConnection = true;
+    
+    const testConnections = async () => {
+      console.group('ProbabilityOS API Connection Test');
+      
+      // Test Polymarket
+      try {
+        const r = await fetch('/api/polymarket/markets?limit=1');
+        console.log('✅ Polymarket:', r.status, r.statusText);
+        if (r.ok) {
+          const d = await r.json();
+          console.log('Polymarket sample:', d?.[0]?.question || d?.markets?.[0]?.question || 'Response received');
+        }
+      } catch (e) {
+        console.error('❌ Polymarket FAILED:', e);
+      }
+      
+      // Test Kalshi
+      try {
+        const r = await fetch('/api/kalshi/trade-api/v2/markets?limit=1');
+        console.log('✅ Kalshi:', r.status, r.statusText);
+        if (r.ok) {
+          const d = await r.json();
+          console.log('Kalshi sample:', d?.markets?.[0]?.title || 'Response received');
+        }
+      } catch (e) {
+        console.error('❌ Kalshi FAILED:', e);
+      }
+      
+      console.groupEnd();
+    };
+    
+    testConnections();
+  }, []);
   
   const markets = useMemo(() => {
     const poly = polymarket.data || [];
@@ -21,8 +62,8 @@ export function useMergedMarkets() {
     return merged;
   }, [polymarket.data, kalshi.data]);
   
-  const isLoading = polymarket.isLoading || kalshi.isLoading;
-  const isError = polymarket.isError && kalshi.isError;
+  const isLoading = polymarket.isLoading && kalshi.isLoading;
+  const isError = polymarket.isError && kalshi.isError && markets.length === 0;
   const error = polymarket.error || kalshi.error;
   
   return {
@@ -33,6 +74,18 @@ export function useMergedMarkets() {
     refetch: () => {
       polymarket.refetch();
       kalshi.refetch();
+    },
+    refetchPoly: polymarket.refetch,
+    refetchKalshi: kalshi.refetch,
+    polyStatus: {
+      isLoading: polymarket.isLoading,
+      isError: polymarket.isError,
+      count: polymarket.data?.length || 0
+    },
+    kalshiStatus: {
+      isLoading: kalshi.isLoading,
+      isError: kalshi.isError,
+      count: kalshi.data?.length || 0
     }
   };
 }

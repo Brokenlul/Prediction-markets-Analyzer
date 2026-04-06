@@ -1,63 +1,125 @@
 import { useQuery } from '@tanstack/react-query';
-import { Market, KalshiMarket } from '../types';
-import { detectCategory } from '../utils/normalize';
+import { Market } from '../types';
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
+function detectCategory(title: string, categoryHint: string = ''): string {
+  const t = (title || '').toLowerCase();
+  const c = (categoryHint || '').toLowerCase();
+  
+  if (t.includes('bitcoin') || t.includes('btc') || t.includes('ethereum') ||
+      t.includes('eth ') || t.includes('crypto') || t.includes('solana') ||
+      c.includes('crypto'))
+    return 'Crypto';
+    
+  if (t.includes('fed') || t.includes('fomc') || t.includes('rate cut') ||
+      t.includes('rate hike') || t.includes('interest rate') || t.includes('cpi') ||
+      t.includes('inflation') || t.includes('gdp') || t.includes('powell') ||
+      t.includes('basis point') || c.includes('economics') || c.includes('finance'))
+    return 'Finance';
+    
+  if (t.includes('war') || t.includes('conflict') || t.includes('invasion') ||
+      t.includes('military') || t.includes('taiwan') || t.includes('ukraine') ||
+      t.includes('israel') || t.includes('iran') || t.includes('nato') ||
+      t.includes('nuclear') || t.includes('missile') || t.includes('troops'))
+    return 'World Events';
+    
+  if (t.includes('elect') || t.includes('president') || t.includes('trump') ||
+      t.includes('congress') || t.includes('senate') || t.includes('vote') ||
+      t.includes('democrat') || t.includes('republican') || t.includes('poll') ||
+      c.includes('politic'))
+    return 'Politics';
+    
+  if (t.includes('weather') || t.includes('hurricane') || t.includes('temperature') ||
+      t.includes('rainfall') || t.includes('storm') || t.includes('climate') ||
+      c.includes('weather'))
+    return 'Weather';
+    
+  if (t.includes('nfl') || t.includes('nba') || t.includes('mlb') ||
+      t.includes('super bowl') || t.includes('world cup') || t.includes('olympic') ||
+      t.includes('championship') || t.includes('league') || t.includes(' win ') ||
+      t.includes(' vs ') || t.includes(' vs. ') || c.includes('sport'))
+    return 'Sports';
+    
+  if (t.includes('oscar') || t.includes('grammy') || t.includes('emmy') ||
+      t.includes('celebrity') || t.includes('movie') || t.includes('award') ||
+      c.includes('entertainment'))
+    return 'Entertainment';
+    
+  return 'Default';
+}
 
 export function useKalshiMarkets() {
   return useQuery({
     queryKey: ['kalshi-markets'],
     queryFn: async (): Promise<Market[]> => {
-      const url = `${API_BASE}/api/kalshi/markets?status=open&limit=100`;
-      const response = await fetch(url);
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch Kalshi markets');
+      try {
+        const res = await fetch(
+          '/api/kalshi/trade-api/v2/markets?status=open&limit=100',
+          {
+            method: 'GET', 
+            headers: { 'Accept': 'application/json' }
+          }
+        );
+        
+        if (!res.ok) {
+          console.error('Kalshi fetch failed:', res.status, res.statusText);
+          return [];
+        }
+        
+        const text = await res.text();
+        if (!text || text.trim() === '') return [];
+        
+        const data = JSON.parse(text);
+        const markets = data.markets || data.data || (Array.isArray(data) ? data : []);
+        
+        return markets
+          .filter((m: any) => m && m.status === 'open')
+          .map((m: any) => {
+            // Kalshi prices can be in different formats
+            let yesPrice = 50;
+            
+            // Try dollars format first (0.0 - 1.0)
+            if (m.yes_bid_dollars !== undefined && m.yes_ask_dollars !== undefined) {
+              const yesBid = parseFloat(m.yes_bid_dollars) || 0;
+              const yesAsk = parseFloat(m.yes_ask_dollars) || 1;
+              yesPrice = ((yesBid + yesAsk) / 2) * 100;
+            }
+            // Then try cents format (1-99)
+            else if (m.yes_bid !== undefined || m.yes_ask !== undefined) {
+              const yesBid = m.yes_bid || 0;
+              const yesAsk = m.yes_ask || 100;
+              yesPrice = (yesBid + yesAsk) / 2;
+            }
+            // Fallback to last_price
+            else if (m.last_price !== undefined) {
+              yesPrice = m.last_price;
+            }
+            
+            // Parse volume - might be in cents or dollars
+            let volume24h = 0;
+            if (m.volume_24h_fp) {
+              volume24h = parseFloat(m.volume_24h_fp) || 0;
+            } else if (m.volume_24h) {
+              volume24h = m.volume_24h / 100; // Convert from cents
+            } else if (m.volume) {
+              volume24h = m.volume / 100;
+            }
+            
+            return {
+              id: m.ticker || m.id,
+              title: m.title || m.subtitle || 'Unknown Market',
+              yesPrice: Math.round(yesPrice * 10) / 10,
+              change24h: 0,
+              volume24h,
+              category: detectCategory(m.title || '', m.category || ''),
+              source: 'KALSHI' as const,
+              ticker: m.ticker,
+              endDate: m.close_time || m.expected_expiration_time || ''
+            };
+          });
+      } catch (err) {
+        console.error('Kalshi fetch error:', err);
+        return [];
       }
-      
-      const data = await response.json();
-      const markets: KalshiMarket[] = data.markets || [];
-      
-      return markets.map(market => {
-        // Kalshi prices can be in dollars format (0.65 = 65%) or cents (65 = 65%)
-        let yesPrice = 50;
-        
-        if (market.yes_bid_dollars && market.yes_ask_dollars) {
-          // New format: prices are in dollars (0.0 - 1.0)
-          const yesBid = parseFloat(market.yes_bid_dollars) || 0;
-          const yesAsk = parseFloat(market.yes_ask_dollars) || 1;
-          yesPrice = ((yesBid + yesAsk) / 2) * 100;
-        } else if (market.yes_bid !== undefined || market.yes_ask !== undefined) {
-          // Old format: prices in cents (0-100)
-          const yesBid = market.yes_bid || 0;
-          const yesAsk = market.yes_ask || 100;
-          yesPrice = (yesBid + yesAsk) / 2;
-        }
-        
-        // Parse volume
-        let volume24h = 0;
-        if (market.volume_24h_fp) {
-          volume24h = parseFloat(market.volume_24h_fp) || 0;
-        } else if (market.volume_24h) {
-          volume24h = market.volume_24h;
-        } else if (market.volume_fp) {
-          volume24h = parseFloat(market.volume_fp) || 0;
-        } else if (market.volume) {
-          volume24h = market.volume;
-        }
-        
-        return {
-          id: market.ticker,
-          title: market.title || market.subtitle || 'Unknown Market',
-          yesPrice: Math.round(yesPrice * 10) / 10,
-          change24h: 0,
-          volume24h,
-          category: market.category || detectCategory(market.title || ''),
-          source: 'KALSHI' as const,
-          ticker: market.ticker,
-          endDate: market.close_time
-        };
-      });
     },
     staleTime: 30_000,
     refetchInterval: 60_000,
