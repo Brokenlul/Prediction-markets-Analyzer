@@ -4,6 +4,11 @@ import { Nav } from './components/Nav';
 import { Dashboard } from './pages/Dashboard';
 import { ShockDetector } from './pages/ShockDetector';
 import { Chart } from './pages/Chart';
+import { ArbScanner } from './pages/ArbScanner';
+import { GeoHeatmap } from './pages/GeoHeatmap';
+import { TailRisk } from './pages/TailRisk';
+import { FedMacro } from './pages/FedMacro';
+import { Intelligence } from './pages/Intelligence';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -26,26 +31,16 @@ function App() {
               <Route path="/" element={<Dashboard />} />
               <Route path="/shocks" element={<ShockDetector />} />
               <Route path="/chart" element={<Chart />} />
-              {/* Placeholder routes for future pages */}
-              <Route path="/arb" element={<ComingSoon title="Arb Scanner" />} />
-              <Route path="/geo" element={<ComingSoon title="Geo Heatmap" />} />
-              <Route path="/tail" element={<ComingSoon title="Tail Risk Monitor" />} />
-              <Route path="/fed" element={<ComingSoon title="Fed/Macro" />} />
-              <Route path="/intel" element={<ComingSoon title="Intelligence" />} />
+              <Route path="/arb-scanner" element={<ArbScanner />} />
+              <Route path="/geo-heatmap" element={<GeoHeatmap />} />
+              <Route path="/tail-risk" element={<TailRisk />} />
+              <Route path="/fed-macro" element={<FedMacro />} />
+              <Route path="/intelligence" element={<Intelligence />} />
             </Routes>
           </main>
         </div>
       </BrowserRouter>
     </QueryClientProvider>
-  );
-}
-
-function ComingSoon({ title }: { title: string }) {
-  return (
-    <div className="max-w-[1920px] mx-auto px-4 py-12 text-center">
-      <h1 className="text-2xl font-semibold text-white mb-4">{title}</h1>
-      <p className="text-gray-400">Coming in Phase 2</p>
-    </div>
   );
 }
 

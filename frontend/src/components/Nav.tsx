@@ -8,11 +8,11 @@ const NAV_ITEMS = [
   { path: '/', label: 'Dashboard', icon: Activity },
   { path: '/shocks', label: 'Shock Detector', icon: TrendingUp },
   { path: '/chart', label: 'Chart', icon: LineChart },
-  { path: '/arb', label: 'Arb Scanner', icon: ArrowRightLeft, disabled: true },
-  { path: '/geo', label: 'Geo Heatmap', icon: Globe, disabled: true },
-  { path: '/tail', label: 'Tail Risk', icon: AlertTriangle, disabled: true },
-  { path: '/fed', label: 'Fed/Macro', icon: Landmark, disabled: true },
-  { path: '/intel', label: 'Intelligence', icon: Brain, disabled: true },
+  { path: '/arb-scanner', label: 'Arb Scanner', icon: ArrowRightLeft },
+  { path: '/geo-heatmap', label: 'Geo Heatmap', icon: Globe },
+  { path: '/tail-risk', label: 'Tail Risk', icon: AlertTriangle },
+  { path: '/fed-macro', label: 'Fed/Macro', icon: Landmark },
+  { path: '/intelligence', label: 'Intelligence', icon: Brain },
 ];
 
 export function Nav() {
@@ -44,17 +44,14 @@ export function Nav() {
           {NAV_ITEMS.map(item => (
             <NavLink
               key={item.path}
-              to={item.disabled ? '#' : item.path}
+              to={item.path}
               className={({ isActive }) => `
                 flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-md transition-colors
-                ${item.disabled 
-                  ? 'text-gray-600 cursor-not-allowed' 
-                  : isActive || (item.path === '/' && location.pathname === '/')
-                    ? 'bg-[#6366f1]/20 text-[#6366f1]'
-                    : 'text-gray-400 hover:text-white hover:bg-[#1e1e2e]'
+                ${isActive || (item.path === '/' && location.pathname === '/')
+                  ? 'bg-[#6366f1]/20 text-[#6366f1]'
+                  : 'text-gray-400 hover:text-white hover:bg-[#1e1e2e]'
                 }
               `}
-              onClick={e => item.disabled && e.preventDefault()}
               data-testid={`nav-${item.label.toLowerCase().replace(/[^a-z]/g, '-')}`}
             >
               <item.icon className="w-4 h-4" />

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AlertTriangle, ExternalLink } from 'lucide-react';
 import { useMergedMarkets } from '../hooks/useMergedMarkets';
 import { STATS } from '../data/stats';
+import { computeSignals } from '../utils/signals';
 import { 
   truncateTitle, 
   formatPercentage, 
@@ -15,21 +16,36 @@ import {
   FILTER_CATEGORIES
 } from '../utils/normalize';
 import { SkeletonRow, ErrorState } from '../components/Skeleton';
+import { SignalFeed } from '../components/SignalFeed';
 import { Market } from '../types';
 
 export function Dashboard() {
   const navigate = useNavigate();
   const { markets, isLoading, isError, refetch } = useMergedMarkets();
   const [activeFilter, setActiveFilter] = useState('all');
+  const [lastUpdated] = useState(() => new Date());
+  
+  // Generate simulated 24h changes for demo
+  const marketsWithChanges = useMemo(() => {
+    return markets.map((market, index) => ({
+      ...market,
+      change24h: market.change24h || (Math.random() - 0.4) * 15 * (index < 20 ? 1.5 : 0.5)
+    }));
+  }, [markets]);
   
   const filteredMarkets = useMemo(() => {
-    if (activeFilter === 'all') return markets;
+    if (activeFilter === 'all') return marketsWithChanges;
     
     const filterConfig = FILTER_CATEGORIES.find(f => f.id === activeFilter);
-    if (!filterConfig || filterConfig.categories.length === 0) return markets;
+    if (!filterConfig || filterConfig.categories.length === 0) return marketsWithChanges;
     
-    return markets.filter(m => filterConfig.categories.includes(m.category));
-  }, [markets, activeFilter]);
+    return marketsWithChanges.filter(m => filterConfig.categories.includes(m.category));
+  }, [marketsWithChanges, activeFilter]);
+  
+  // Compute signals for Signal Feed
+  const signals = useMemo(() => {
+    return computeSignals(marketsWithChanges, STATS.category_volatility);
+  }, [marketsWithChanges]);
   
   const handleMarketClick = (market: Market) => {
     navigate('/chart', { state: { market } });
@@ -46,6 +62,15 @@ export function Dashboard() {
           Live prediction market data from Polymarket & Kalshi • {markets.length} active markets
         </p>
       </div>
+      
+      {/* Signal Feed */}
+      {!isLoading && !isError && signals.length > 0 && (
+        <SignalFeed 
+          signals={signals}
+          onSignalClick={handleMarketClick}
+          lastUpdated={lastUpdated}
+        />
+      )}
       
       {/* Category Filter Tabs */}
       <div className="flex gap-2 mb-6 overflow-x-auto pb-2" data-testid="category-filters">
