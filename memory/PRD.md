@@ -19,19 +19,19 @@ Build a macro intelligence terminal called "ProbabilityOS" — a dark, professio
 │   └── .env
 ├── frontend/
 │   ├── src/
-│   │   ├── components/    # Nav, Skeleton
+│   │   ├── components/    # Nav, Skeleton, SignalFeed, SignalCard, Sparkline
 │   │   ├── data/          # stats.ts (hardcoded calibration data)
 │   │   ├── hooks/         # usePolymarket, useKalshi, useMergedMarkets
-│   │   ├── pages/         # Dashboard, ShockDetector, Chart
+│   │   ├── pages/         # Dashboard, ShockDetector, Chart, ArbScanner, GeoHeatmap, TailRisk, FedMacro, Intelligence
 │   │   ├── types/         # TypeScript interfaces
-│   │   └── utils/         # normalize, regime
+│   │   └── utils/         # normalize, regime, signals
 │   ├── vite.config.ts
 │   └── tailwind.config.js
 └── test_reports/
 ```
 
 ## User Personas
-1. **Macro Traders** - Need real-time probability data across multiple markets
+1. **Macro Traders** - Need real-time probability data across multiple markets with trade implications
 2. **Risk Analysts** - Want to monitor geopolitical tail risks and volatility shocks
 3. **Quantitative Researchers** - Interested in calibration data and smart money signals
 
@@ -42,89 +42,129 @@ Build a macro intelligence terminal called "ProbabilityOS" — a dark, professio
 - Category-based filtering and calibration insights
 - Shock detection based on z-score analysis
 - Historical price charts with technical indicators
+- Trade implications for actionable signals
 
 ---
 
 ## What's Been Implemented
 
 ### April 1, 2026 - Phase 1 MVP
+- ✅ Dashboard with live market data
+- ✅ Shock Detector with z-score analysis
+- ✅ Chart page with price history
 
-#### Page 1: Global Probability Dashboard
-- ✅ Live market data from Polymarket (via backend proxy)
-- ✅ Market table with: Title, YES %, 24H Change, Volume, Calibration, Source
-- ✅ Category filter tabs: All, Crypto, Fed & Macro, Geopolitics, Regulation, Elections, Tail Risks
-- ✅ High optimism bias warnings for World Events/Entertainment/Media
-- ✅ Color-coded YES prices (green >60%, red <40%)
-- ✅ Calibration trust score badges with color coding
-- ✅ Auto-refresh every 60 seconds
+### April 6, 2026 - Phase 2 Complete + Signal Feed
 
-#### Page 2: Probability Shock Detector
-- ✅ Z-score calculation based on category volatility baselines
-- ✅ Alert cards for markets with |z-score| > 2.0
-- ✅ Color-coded severity: yellow (2.0-2.5σ), orange (2.5-3.0σ), red with pulse (3.0+σ)
-- ✅ Longshot bias warnings for prices <20%
-- ✅ Optimism tax warnings for high-bias categories
-- ✅ Category volatility baselines display
+#### Page 1: Dashboard (Enhanced)
+- ✅ Live market data from Polymarket + Kalshi (128+ markets)
+- ✅ **NEW: Signal Feed** with actionable probability moves
+  - Signal types: SHOCK, TREND, THRESHOLD, TAIL RISK
+  - Sparkline charts for each signal
+  - Trade implications (e.g., "Long crude oil", "Short airlines")
+  - Horizontal scrolling ticker tape design
+- ✅ Category filter tabs
+- ✅ Market table with calibration badges
+- ✅ Click-to-chart navigation
 
-#### Page 3: Historical Probability Chart
-- ✅ Interactive LineChart with Recharts
-- ✅ Price history with 7-period moving average
-- ✅ Volume bars at bottom
-- ✅ Time interval buttons: 1H, 6H, 1D, 1W
-- ✅ Data Insights Panel: Calibration Score, Smart Money Gap, YES/NO Asymmetry
-- ✅ Longshot bias warning when applicable
-- ✅ Back navigation
+#### Page 2: Shock Detector
+- ✅ Z-score calculation with color-coded severity
+- ✅ Clickable cards navigate to Chart
+- ✅ Longshot bias warnings
+- ✅ Optimism tax warnings
 
-#### Global Navigation
-- ✅ ProbabilityOS logo in indigo
-- ✅ Tab navigation with icons
-- ✅ LIVE indicator with pulsing green dot
-- ✅ "Updated Xs ago" counter
+#### Page 3: Chart (Fixed)
+- ✅ **FIX**: Market context now passed via router state
+- ✅ **NEW**: Searchable market dropdown
+- ✅ Interactive LineChart with price history
+- ✅ Time interval buttons (1H, 6H, 1D, 1W)
+- ✅ Data Insights panel with STATS
+
+#### Page 4: Arb Scanner (Rebuilt)
+- ✅ **FIX**: No longer blank screen
+- ✅ Jaccard similarity matching for cross-exchange pairs
+- ✅ Gap threshold filter (3pt, 5pt, 10pt)
+- ✅ Shows POLY vs KALSHI price comparisons
+- ✅ Error handling and warning banners
+
+#### Page 5: Geo Heatmap (Rebuilt)
+- ✅ **FIX**: No longer blank screen
+- ✅ Country keyword detection (17 countries)
+- ✅ Color-coded risk levels by max probability
+- ✅ Clickable countries show related markets
+- ✅ World Events calibration warning banner
+
+#### Page 6: Tail Risk Monitor (Built)
+- ✅ Filters markets where YES < 20%
+- ✅ Relative change calculation
+- ✅ Longshot bias warnings from STATS
+- ✅ Calibration and smart money gap display
+- ✅ Longshot bias table from 72.1M trades
+
+#### Page 7: Fed/Macro (Built)
+- ✅ Fed keyword filtering (fed, fomc, rate, cpi, inflation, etc.)
+- ✅ Markets sorted by end date
+- ✅ **Macro Certainty Score** gauge (0-100)
+- ✅ Finance category insight box (99% calibration, 0.17pp gap)
+- ✅ "Why Trust Fed Markets?" explanation
+
+#### Page 8: Intelligence (Built)
+- ✅ **Narrative Momentum Leaderboard** with Rising/Falling tabs
+- ✅ **Optimism Tax chart** - YES vs NO buyer returns
+- ✅ **Smart Money Gap chart** - Category comparison
+- ✅ **Longshot Trap chart** - Implied vs actual win rates
+- ✅ Key Intelligence Takeaway summary
+
+#### Global Components
+- ✅ Navigation with all 8 pages active
+- ✅ LIVE indicator with update counter
 - ✅ Regime Pill (RISK-ON/RISK-OFF/TRANSITIONING/TAIL-RISK)
+- ✅ Signal Feed with trade implications
 
-#### Backend API Proxy
-- ✅ /api/polymarket/markets - Proxy for Gamma API
-- ✅ /api/polymarket/prices-history - Proxy for CLOB API
-- ✅ /api/kalshi/markets - Proxy for Kalshi API
-- ✅ CORS handling with FastAPI middleware
-
-#### Hardcoded STATS Data
-- ✅ Category volatility baselines
-- ✅ Calibration trust scores per category
-- ✅ Smart money gap values
-- ✅ Longshot bias table (72.1M trade dataset)
-- ✅ YES/NO asymmetry and optimism tax
+#### Signal System (NEW)
+- ✅ `src/utils/signals.ts` - Signal classification and trade implications
+- ✅ `src/components/SignalCard.tsx` - Individual signal cards
+- ✅ `src/components/SignalFeed.tsx` - Horizontal scrolling feed
+- ✅ `src/components/Sparkline.tsx` - Mini price charts
+- ✅ TRADE_IMPLICATIONS mapping for:
+  - Middle East conflict
+  - Hormuz disruption
+  - Taiwan conflict
+  - Fed rate decisions
+  - Crypto ETF approvals
+  - Trump/tariff policies
+  - Recession indicators
+  - And more...
 
 ---
 
 ## Prioritized Backlog
 
-### P0 - Critical (Phase 2)
-- [ ] Page 4: Cross-Market Arb Scanner (Polymarket vs Kalshi price gaps)
-- [ ] Page 5: Geopolitical Risk Heatmap (react-simple-maps)
-- [ ] Page 6: Tail Risk Monitor (markets <20% with spike detection)
+### P0 - Critical
+- [x] All 8 pages working ✅
+- [x] Signal Feed with trade implications ✅
+- [x] Chart navigation fixed ✅
 
-### P1 - High Priority (Phase 3)
-- [ ] Page 7: Fed Path & Macro Certainty (rate path tree, certainty gauge)
-- [ ] Page 8: Narrative Momentum + Market Intelligence Panel
-- [ ] Real 24h price change calculation from historical data
-- [ ] Kalshi market integration in dashboard
+### P1 - High Priority
+- [ ] Real price history fetching (replace mock data)
+- [ ] WebSocket for real-time updates
+- [ ] Actual 24h change from API data
+- [ ] More Kalshi markets integration
 
 ### P2 - Medium Priority
-- [ ] Portfolio tracking / watchlist feature
-- [ ] Alert notifications for shock events
-- [ ] Export data to CSV/JSON
-- [ ] Mobile-responsive optimization
+- [ ] Portfolio tracking / watchlist
+- [ ] Alert notifications
+- [ ] Export to CSV/JSON
+- [ ] Mobile responsive optimization
 
-### P3 - Low Priority / Nice to Have
-- [ ] Historical data processing pipeline (36GB dataset)
-- [ ] Real-time WebSocket updates
-- [ ] User authentication and saved preferences
+### P3 - Low Priority
+- [ ] Historical data processing (36GB dataset)
+- [ ] User authentication
+- [ ] Saved preferences
 
 ---
 
 ## Next Tasks
-1. Implement Cross-Market Arb Scanner (Page 4)
-2. Add Geopolitical Risk Heatmap with react-simple-maps (Page 5)
-3. Build Tail Risk Monitor with 30-day spike detection (Page 6)
-4. Integrate Kalshi markets into the unified dashboard view
+1. Implement real price history API calls
+2. Add WebSocket for live updates
+3. Expand trade implications for more market types
+4. Add export functionality
