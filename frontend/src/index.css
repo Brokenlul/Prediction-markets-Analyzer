@@ -111,6 +111,20 @@ body {
   animation: pulse-border 2s ease-in-out infinite;
 }
 
+/* Subtle pulse for CRITICAL market rows */
+@keyframes pulse-subtle {
+  0%, 100% {
+    background-color: rgba(239, 68, 68, 0.08);
+  }
+  50% {
+    background-color: rgba(239, 68, 68, 0.14);
+  }
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 3s ease-in-out infinite;
+}
+
 /* Thin scrollbar for horizontal scroll */
 .scrollbar-thin::-webkit-scrollbar {
   height: 4px;

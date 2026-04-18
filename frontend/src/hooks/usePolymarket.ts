@@ -4,48 +4,71 @@ import { Market, PriceHistoryPoint } from '../types';
 function detectCategory(title: string, tags: string[] = []): string {
   const t = (title || '').toLowerCase();
   const tagStr = JSON.stringify(tags || '').toLowerCase();
-  
+
+  // Crypto first — very specific
   if (t.includes('bitcoin') || t.includes('btc') || t.includes('ethereum') ||
       t.includes('eth ') || t.includes('crypto') || t.includes('solana') ||
-      t.includes('sol ') || t.includes('coinbase') || tagStr.includes('crypto'))
+      t.includes('sol ') || t.includes('coinbase') || t.includes('defi') ||
+      t.includes('nft') || t.includes('xrp') || t.includes('ripple') ||
+      t.includes('dogecoin') || t.includes('shiba') || t.includes('pepe') ||
+      t.includes('altcoin') || t.includes('blockchain') || t.includes('token') ||
+      tagStr.includes('crypto'))
     return 'Crypto';
-    
+
+  // Equities — stock market specific
+  if (t.includes('s&p') || t.includes('sp500') || t.includes('nasdaq') ||
+      t.includes('dow jones') || t.includes('stock market') || t.includes('spy ') ||
+      t.includes('qqq') || t.includes('iwm') || t.includes('russell') ||
+      t.includes('vix') || t.includes('volatility index') || t.includes('stock price') ||
+      t.includes('share price') || t.includes('market crash') || t.includes('all-time high') ||
+      t.includes('bull market') || t.includes('bear market') || t.includes('earnings report') ||
+      t.includes('ipo') || tagStr.includes('equit') || tagStr.includes('stock'))
+    return 'Equities';
+
+  // Commodities — raw materials and energy
+  if (t.includes(' oil') || t.includes('crude') || t.includes('gold price') ||
+      t.includes('gold ') || t.includes('silver ') || t.includes('copper') ||
+      t.includes('wheat') || t.includes('corn') || t.includes('natural gas') ||
+      t.includes('opec') || t.includes('wti') || t.includes('brent') ||
+      t.includes('commodity') || t.includes('precious metal') || t.includes('gasoline') ||
+      t.includes('platinum') || t.includes('palladium') || t.includes('lithium') ||
+      tagStr.includes('commodit') || tagStr.includes('energy'))
+    return 'Commodities';
+
+  // Macro/Finance
   if (t.includes('fed') || t.includes('fomc') || t.includes('rate cut') ||
       t.includes('rate hike') || t.includes('interest rate') || t.includes('cpi') ||
       t.includes('inflation') || t.includes('gdp') || t.includes('powell') ||
-      t.includes('basis point') || tagStr.includes('economics'))
+      t.includes('basis point') || t.includes('treasury') || t.includes('yield') ||
+      t.includes('recession') || t.includes('unemployment') || t.includes('payroll') ||
+      t.includes('debt ceiling') || tagStr.includes('economics'))
     return 'Finance';
-    
+
   if (t.includes('war') || t.includes('conflict') || t.includes('invasion') ||
       t.includes('military') || t.includes('taiwan') || t.includes('ukraine') ||
       t.includes('israel') || t.includes('iran') || t.includes('nato') ||
       t.includes('nuclear') || t.includes('missile') || t.includes('troops'))
     return 'World Events';
-    
+
   if (t.includes('elect') || t.includes('president') || t.includes('trump') ||
       t.includes('congress') || t.includes('senate') || t.includes('vote') ||
       t.includes('democrat') || t.includes('republican') || t.includes('poll'))
     return 'Politics';
-    
-  if (t.includes('sec') || t.includes('cftc') || t.includes('regulation') ||
-      t.includes('ban') || t.includes('approve') || t.includes('etf') ||
-      t.includes('lawsuit') || t.includes('legislation'))
-    return 'Finance';
-    
+
   if (t.includes('weather') || t.includes('hurricane') || t.includes('temperature') ||
       t.includes('rainfall') || t.includes('storm') || t.includes('climate'))
     return 'Weather';
-    
+
   if (t.includes('nfl') || t.includes('nba') || t.includes('mlb') ||
       t.includes('super bowl') || t.includes('world cup') || t.includes('olympic') ||
       t.includes('championship') || t.includes('league') || t.includes(' win ') ||
       t.includes(' vs ') || t.includes(' vs. '))
     return 'Sports';
-    
+
   if (t.includes('oscar') || t.includes('grammy') || t.includes('emmy') ||
       t.includes('celebrity') || t.includes('movie') || t.includes('award'))
     return 'Entertainment';
-    
+
   return 'Default';
 }
 
@@ -124,8 +147,8 @@ export function usePolymarketMarkets() {
         return [];
       }
     },
-    staleTime: 30_000,
-    refetchInterval: 60_000,
+    staleTime: 20_000,
+    refetchInterval: 30_000,
     retry: 2
   });
 }

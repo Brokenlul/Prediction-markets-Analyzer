@@ -10,6 +10,10 @@ export interface Market {
   ticker?: string;
   endDate?: string;
   description?: string;
+  isNew?: boolean;
+  importanceScore?: number;
+  importanceTier?: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
+  seenAt?: number;
 }
 
 export interface PriceHistoryPoint {

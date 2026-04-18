@@ -1,7 +1,9 @@
 // Category detection keywords
 const CATEGORY_KEYWORDS: Record<string, string[]> = {
-  Crypto: ['crypto', 'bitcoin', 'btc', 'ethereum', 'eth', 'solana', 'sol', 'defi', 'blockchain', 'token', 'nft', 'altcoin', 'binance', 'coinbase', 'ripple', 'xrp', 'dogecoin', 'cardano'],
-  Finance: ['fed', 'rate', 'fomc', 'inflation', 'gdp', 'unemployment', 'recession', 'treasury', 'bond', 'yield', 'cpi', 'ppi', 'jobs', 'payroll', 'economic', 'interest rate', 'federal reserve', 'monetary', 'fiscal', 'stock market', 's&p', 'nasdaq', 'dow'],
+  Crypto: ['crypto', 'bitcoin', 'btc', 'ethereum', 'eth', 'solana', 'sol', 'defi', 'blockchain', 'token', 'nft', 'altcoin', 'binance', 'coinbase', 'ripple', 'xrp', 'dogecoin', 'cardano', 'matic', 'avalanche', 'avax', 'chainlink', 'link', 'uniswap', 'polkadot', 'dot', 'litecoin', 'ltc', 'shiba', 'pepe'],
+  Equities: ['s&p', 'sp500', 'sp 500', 'nasdaq', 'dow jones', 'stock market', 'equit', 'ipo', 'earnings', 'market cap', 'bull market', 'bear market', 'rally', 'correction', 'spy', 'qqq', 'iwm', 'russell', 'vix', 'volatility index', 'stock price', 'share price', 'market crash', 'all-time high', 'ath'],
+  Commodities: ['oil', 'crude', 'gold', 'silver', 'copper', 'wheat', 'corn', 'natural gas', 'commodity', 'opec', 'wti', 'brent', 'precious metal', 'energy price', 'gasoline', 'platinum', 'palladium', 'cocoa', 'coffee', 'sugar', 'soybean', 'lumber', 'cotton', 'iron ore', 'lithium'],
+  Finance: ['fed', 'rate', 'fomc', 'inflation', 'gdp', 'unemployment', 'recession', 'treasury', 'bond', 'yield', 'cpi', 'ppi', 'jobs', 'payroll', 'economic', 'interest rate', 'federal reserve', 'monetary', 'fiscal', 'bank', 'debt ceiling', 'default', 'deficit'],
   Politics: ['election', 'vote', 'president', 'senate', 'congress', 'democrat', 'republican', 'biden', 'trump', 'governor', 'poll', 'primary', 'candidate', 'ballot', 'electoral', 'political', 'legislation', 'bill', 'veto'],
   "World Events": ['war', 'conflict', 'invasion', 'military', 'sanctions', 'coup', 'nato', 'russia', 'ukraine', 'china', 'taiwan', 'geopolit', 'israel', 'gaza', 'iran', 'north korea', 'syria', 'terror', 'missile', 'nuclear'],
   Sports: ['nfl', 'nba', 'mlb', 'nhl', 'super bowl', 'championship', 'playoffs', 'world series', 'stanley cup', 'mvp', 'draft', 'football', 'basketball', 'baseball', 'hockey', 'soccer', 'tennis', 'golf', 'olympics', 'ufc', 'boxing'],
@@ -27,10 +29,12 @@ export function detectCategory(title: string): string {
 // Map user-facing filter categories to internal categories
 export const FILTER_CATEGORIES = [
   { id: 'all', label: 'All', categories: [] },
+  { id: 'hot', label: '🔥 Hot', categories: [] }, // handled specially — importance tier filter
   { id: 'crypto', label: 'Crypto', categories: ['Crypto'] },
+  { id: 'equities', label: 'Equities', categories: ['Equities'] },
+  { id: 'commodities', label: 'Commodities', categories: ['Commodities'] },
   { id: 'fed-macro', label: 'Fed & Macro', categories: ['Finance'] },
   { id: 'geopolitics', label: 'Geopolitics', categories: ['World Events', 'Politics'] },
-  { id: 'regulation', label: 'Regulation', categories: ['Finance', 'Crypto'] },
   { id: 'elections', label: 'Elections', categories: ['Politics'] },
   { id: 'tail-risks', label: 'Tail Risks', categories: ['World Events', 'Weather'] },
 ];

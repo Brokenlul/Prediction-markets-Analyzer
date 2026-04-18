@@ -4,46 +4,68 @@ import { Market } from '../types';
 function detectCategory(title: string, categoryHint: string = ''): string {
   const t = (title || '').toLowerCase();
   const c = (categoryHint || '').toLowerCase();
-  
+
+  // Crypto first
   if (t.includes('bitcoin') || t.includes('btc') || t.includes('ethereum') ||
       t.includes('eth ') || t.includes('crypto') || t.includes('solana') ||
-      c.includes('crypto'))
+      t.includes('defi') || t.includes('nft') || t.includes('xrp') ||
+      t.includes('dogecoin') || t.includes('blockchain') || c.includes('crypto'))
     return 'Crypto';
-    
+
+  // Equities
+  if (t.includes('s&p') || t.includes('sp500') || t.includes('nasdaq') ||
+      t.includes('dow jones') || t.includes('stock market') || t.includes('spy ') ||
+      t.includes('qqq') || t.includes('russell') || t.includes('vix') ||
+      t.includes('stock price') || t.includes('bull market') || t.includes('bear market') ||
+      t.includes('earnings') || t.includes('ipo') || c.includes('equit') || c.includes('stock'))
+    return 'Equities';
+
+  // Commodities
+  if (t.includes(' oil') || t.includes('crude') || t.includes('gold price') ||
+      t.includes('gold ') || t.includes('silver ') || t.includes('copper') ||
+      t.includes('wheat') || t.includes('corn') || t.includes('natural gas') ||
+      t.includes('opec') || t.includes('wti') || t.includes('brent') ||
+      t.includes('commodity') || t.includes('gasoline') || t.includes('lithium') ||
+      c.includes('commodit') || c.includes('energy'))
+    return 'Commodities';
+
+  // Macro/Finance
   if (t.includes('fed') || t.includes('fomc') || t.includes('rate cut') ||
       t.includes('rate hike') || t.includes('interest rate') || t.includes('cpi') ||
       t.includes('inflation') || t.includes('gdp') || t.includes('powell') ||
-      t.includes('basis point') || c.includes('economics') || c.includes('finance'))
+      t.includes('basis point') || t.includes('treasury') || t.includes('yield') ||
+      t.includes('recession') || t.includes('unemployment') || t.includes('payroll') ||
+      t.includes('debt ceiling') || c.includes('economics') || c.includes('finance'))
     return 'Finance';
-    
+
   if (t.includes('war') || t.includes('conflict') || t.includes('invasion') ||
       t.includes('military') || t.includes('taiwan') || t.includes('ukraine') ||
       t.includes('israel') || t.includes('iran') || t.includes('nato') ||
       t.includes('nuclear') || t.includes('missile') || t.includes('troops'))
     return 'World Events';
-    
+
   if (t.includes('elect') || t.includes('president') || t.includes('trump') ||
       t.includes('congress') || t.includes('senate') || t.includes('vote') ||
       t.includes('democrat') || t.includes('republican') || t.includes('poll') ||
       c.includes('politic'))
     return 'Politics';
-    
+
   if (t.includes('weather') || t.includes('hurricane') || t.includes('temperature') ||
       t.includes('rainfall') || t.includes('storm') || t.includes('climate') ||
       c.includes('weather'))
     return 'Weather';
-    
+
   if (t.includes('nfl') || t.includes('nba') || t.includes('mlb') ||
       t.includes('super bowl') || t.includes('world cup') || t.includes('olympic') ||
       t.includes('championship') || t.includes('league') || t.includes(' win ') ||
       t.includes(' vs ') || t.includes(' vs. ') || c.includes('sport'))
     return 'Sports';
-    
+
   if (t.includes('oscar') || t.includes('grammy') || t.includes('emmy') ||
       t.includes('celebrity') || t.includes('movie') || t.includes('award') ||
       c.includes('entertainment'))
     return 'Entertainment';
-    
+
   return 'Default';
 }
 
@@ -53,7 +75,7 @@ export function useKalshiMarkets() {
     queryFn: async (): Promise<Market[]> => {
       try {
         const res = await fetch(
-          '/api/kalshi/markets?status=open&limit=100',
+          '/api/kalshi/markets?status=open&limit=200',
           {
             method: 'GET',
             headers: { 'Accept': 'application/json' }
@@ -104,8 +126,8 @@ export function useKalshiMarkets() {
         return [];
       }
     },
-    staleTime: 30_000,
-    refetchInterval: 60_000,
+    staleTime: 20_000,
+    refetchInterval: 30_000,
     retry: 2
   });
 }

@@ -2,6 +2,8 @@ export const STATS = {
   category_volatility: {
     Crypto: 4.2,
     Finance: 1.1,
+    Equities: 1.8,
+    Commodities: 2.4,
     Sports: 3.8,
     Politics: 2.9,
     Weather: 2.1,
@@ -14,6 +16,8 @@ export const STATS = {
   calibration: {
     Crypto: { trust_score: 89, note: "Slight overconfidence at high probabilities" },
     Finance: { trust_score: 99, note: "Near-perfect calibration — most reliable" },
+    Equities: { trust_score: 96, note: "High calibration — data-driven equity markets" },
+    Commodities: { trust_score: 94, note: "Well-calibrated — supply/demand driven" },
     Sports: { trust_score: 91, note: "Reliable for high-probability outcomes" },
     Politics: { trust_score: 87, note: "Good calibration, watch for partisan bias" },
     Weather: { trust_score: 93, note: "Highly calibrated — data-driven" },
@@ -28,6 +32,8 @@ export const STATS = {
     Politics: 1.02,
     Crypto: 2.69,
     Finance: 0.17,
+    Equities: 0.31,
+    Commodities: 0.58,
     Weather: 2.57,
     Entertainment: 4.79,
     Media: 7.28,

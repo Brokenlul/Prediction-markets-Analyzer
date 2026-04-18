@@ -1,4 +1,60 @@
 import { Market } from '../types';
+import { STATS } from '../data/stats';
+
+// High-priority categories for market importance boosting
+const PRIORITY_CATEGORIES = new Set(['Crypto', 'Finance', 'Equities', 'Commodities']);
+
+export interface ImportanceResult {
+  score: number;
+  tier: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
+}
+
+/**
+ * Compute an importance score (0-100) for a market based on:
+ * - Volume (30 pts): log-scale, $1M+ = full 30
+ * - Z-score (30 pts): |change| / category volatility
+ * - Price conviction (20 pts): distance from 50% (extreme conviction = high importance)
+ * - Change magnitude (20 pts): raw 24h change size
+ * - Category boost: +10 for Crypto/Finance/Equities/Commodities
+ */
+export function computeImportanceScore(market: Market): ImportanceResult {
+  const categoryVol = STATS.category_volatility[market.category] ?? STATS.category_volatility.Default;
+
+  // Volume score (30 pts, log scale)
+  const vol = market.volume24h;
+  let volScore = 0;
+  if (vol >= 10_000_000) volScore = 30;
+  else if (vol >= 1_000_000) volScore = 24;
+  else if (vol >= 100_000) volScore = 18;
+  else if (vol >= 10_000) volScore = 12;
+  else if (vol >= 1_000) volScore = 6;
+  else volScore = Math.min(6, (vol / 1_000) * 6);
+
+  // Z-score score (30 pts)
+  const zScore = Math.abs(market.change24h) / categoryVol;
+  const zScoreScore = Math.min(30, zScore * 10);
+
+  // Price conviction score (20 pts): distance from 50%
+  const distFrom50 = Math.abs(market.yesPrice - 50);
+  const convictionScore = Math.min(20, (distFrom50 / 50) * 20);
+
+  // Change magnitude score (20 pts)
+  const changeScore = Math.min(20, Math.abs(market.change24h) * 1.2);
+
+  // Category boost
+  const categoryBoost = PRIORITY_CATEGORIES.has(market.category) ? 10 : 0;
+
+  const raw = volScore + zScoreScore + convictionScore + changeScore + categoryBoost;
+  const score = Math.min(100, Math.round(raw));
+
+  let tier: ImportanceResult['tier'];
+  if (score >= 70) tier = 'CRITICAL';
+  else if (score >= 50) tier = 'HIGH';
+  else if (score >= 30) tier = 'MEDIUM';
+  else tier = 'LOW';
+
+  return { score, tier };
+}
 
 export const TRADE_IMPLICATIONS: Record<string, string[]> = {
   middle_east_conflict_rising: [
